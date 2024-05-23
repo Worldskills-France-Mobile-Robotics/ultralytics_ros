@@ -25,7 +25,7 @@ from rclpy.node import Node
 from sensor_msgs.msg import Image
 from ultralytics import YOLO
 from vision_msgs.msg import Detection2D, Detection2DArray, ObjectHypothesisWithPose
-from ultralytics_ros.msg import YoloObjectDetection, YoloDetections
+from ultralytics_ros.msg import *
 
 
 class TrackerNode(Node):
@@ -47,6 +47,7 @@ class TrackerNode(Node):
         self.declare_parameter("result_font", "Arial.ttf")
         self.declare_parameter("result_labels", True)
         self.declare_parameter("result_boxes", True)
+        self.declare_parameter("debug", False)
 
         path = get_package_share_directory("ultralytics_ros")
         yolo_model = self.get_parameter("yolo_model").get_parameter_value().string_value
@@ -95,6 +96,16 @@ class TrackerNode(Node):
         if results is not None:
             yolo_detections_msg = self.create_yolo_detections_msg(results)
             self.results_pub.publish(yolo_detections_msg)
+            
+            #result image
+            is_debug = (
+                self.get_parameter("debug").get_parameter_value().bool_value
+            )
+            if is_debug:
+                yolo_result_image_msg = Image()
+                yolo_result_image_msg.header = msg.header
+                yolo_result_image_msg = self.create_result_image(results)
+                self.result_image_pub.publish(yolo_result_image_msg)
 
     def create_detections_array(self, results):
         detections_msg = Detection2DArray()
