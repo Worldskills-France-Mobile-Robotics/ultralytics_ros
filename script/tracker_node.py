@@ -25,7 +25,7 @@ from rclpy.node import Node
 from sensor_msgs.msg import Image
 from ultralytics import YOLO
 from vision_msgs.msg import Detection2D, Detection2DArray, ObjectHypothesisWithPose
-from ultralytics_ros.msg import YoloResult
+from ultralytics_ros.msg import YoloObjectDetection, YoloDetections
 
 
 class TrackerNode(Node):
@@ -66,7 +66,7 @@ class TrackerNode(Node):
             self.get_parameter("result_image_topic").get_parameter_value().string_value
         )
         self.create_subscription(Image, input_topic, self.image_callback, 1)
-        self.results_pub = self.create_publisher(YoloResult, result_topic, 1)
+        self.results_pub = self.create_publisher(YoloDetections, result_topic, 1)
         self.result_image_pub = self.create_publisher(Image, result_image_topic, 1)
 
     def image_callback(self, msg):
@@ -93,16 +93,8 @@ class TrackerNode(Node):
         )
 
         if results is not None:
-            yolo_result_msg = YoloResult()
-            yolo_result_image_msg = Image()
-            yolo_result_msg.header = msg.header
-            yolo_result_image_msg.header = msg.header
-            yolo_result_msg.detections = self.create_detections_array(results)
-            yolo_result_image_msg = self.create_result_image(results)
-            if self.use_segmentation:
-                yolo_result_msg.masks = self.create_segmentation_masks(results)
-            self.results_pub.publish(yolo_result_msg)
-            self.result_image_pub.publish(yolo_result_image_msg)
+            yolo_detections_msg = self.create_yolo_detections_msg(results)
+            self.results_pub.publish(yolo_detections_msg)
 
     def create_detections_array(self, results):
         detections_msg = Detection2DArray()
@@ -167,6 +159,19 @@ class TrackerNode(Node):
                     masks_msg.append(mask_image_msg)
         return masks_msg
 
+    def create_yolo_detections_msg(self, results):
+        detections_msg = YoloDetections()
+        bounding_box = results[0].boxes.xywh
+        classes = results[0].boxes.cls
+        for bbox, cls in zip(bounding_box, classes):
+            detection = YoloObjectDetection()
+            detection.class_name = results[0].names[int(cls)]
+            detection.x = float(bbox[0])
+            detection.y = float(bbox[1])
+            detection.width = float(bbox[2])
+            detection.height = float(bbox[3])
+            detections_msg.detections.append(detection)
+        return detections_msg
 
 def main(args=None):
     rclpy.init(args=args)
