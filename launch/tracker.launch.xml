@@ -2,7 +2,7 @@
 <launch>
   <arg name="use_sim_time" default="false"/>
   <arg name="debug" default="false"/>
-  <arg name="yolo_model" default="yolov8m-seg.pt"/>
+  <arg name="yolo_model" default="best.pt"/>
   <arg name="input_topic" default="camera/color/image_raw"/>
   <arg name="result_topic" default="/yolo_result"/>
   <arg name="result_image_topic" default="/yolo_image"/>
@@ -35,11 +35,12 @@
     <param name="result_font" value="$(var result_font)"/>
     <param name="result_labels" value="$(var result_labels)"/>
     <param name="result_boxes" value="$(var result_boxes)"/>
+    <param name="debug" value="$(var debug)"/>
     <!--<param name="classes" value="0, 1, 2" value-sep=", "/>-->
     <param name="device" value="$(var device)"/>
   </node>
 
-  <node if="$(var debug)" pkg="image_view" exec="image_view" output="screen">
+  <!-- <node if="$(var debug)" pkg="image_view" exec="image_view" output="screen">
     <remap from="image" to="$(var result_image_topic)"/>
-  </node>
+  </node> -->
 </launch>
