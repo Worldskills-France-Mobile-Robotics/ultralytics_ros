@@ -25,11 +25,10 @@ find_package(tf2_eigen REQUIRED)
 find_package(tf2_ros REQUIRED)
 find_package(OpenCV REQUIRED)
 find_package(PCL REQUIRED)
+find_package(pixx_msgs REQUIRED)
 
 rosidl_generate_interfaces(${PROJECT_NAME}
   "msg/YoloResult.msg"
-  "msg/YoloObjectDetection.msg"
-  "msg/YoloDetections.msg"
   DEPENDENCIES
   sensor_msgs
   std_msgs
@@ -54,6 +53,7 @@ ament_target_dependencies(tracker_with_cloud_node
   tf2_ros
   OpenCV
   PCL
+  pixx_msgs
 )
 
 rosidl_get_typesupport_target(cpp_typesupport_target ${PROJECT_NAME} "rosidl_typesupport_cpp")

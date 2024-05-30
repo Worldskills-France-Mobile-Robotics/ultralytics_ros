@@ -26,6 +26,7 @@ from sensor_msgs.msg import Image
 from ultralytics import YOLO
 from vision_msgs.msg import Detection2D, Detection2DArray, ObjectHypothesisWithPose
 from ultralytics_ros.msg import *
+from pixx_msgs.msg import YoloDetections, YoloObjectDetection
 
 
 class TrackerNode(Node):
